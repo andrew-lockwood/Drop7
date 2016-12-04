@@ -2,20 +2,20 @@
 import java.util.Scanner;
 import java.util.Random;
 
-public class Drop9
+public class Drop7
 {
-	public static Board test;
+	public static Board board;
 	public static void main(String[] args) 
 	{
 
-		test = new Board(7);
-		test.populateRandomly();
-		test.printBoard();
+		board = new Board(7);
+		board.populateRandomly();
+		board.printBoard();
 		System.out.println();
 
 		//test.findVertical();
-		test.pop();
-		test.printBoard();
+		board.pop();
+		board.printBoard();
 
 
 
