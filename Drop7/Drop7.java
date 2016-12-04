@@ -5,39 +5,40 @@ import java.util.Random;
 public class Drop7
 {
 	public static Board board;
+
 	public static void main(String[] args) 
 	{
 
 		board = new Board(7);
-		board.populateRandomly();
-		board.printBoard();
-		System.out.println();
+		//board.populateRandomly();
+		//board.printBoard();
+		//board.pop();
+		//board.printBoard();
 
-		//test.findVertical();
-		board.pop();
-		board.printBoard();
-
-
-
-		/*
 		Scanner scanner = new Scanner(System.in);
-
-		int num; 
 		Random rn = new Random();
-		int x;
-		char rand;
 
-		while ( (num = scanner.nextInt()) != 9)
-		{
-			x = rn.nextInt(7) + 1;
+		//int num  = scanner.nextInt(); 
+		int rand = rn.nextInt(7) + 1;
+		int num;
 
-			System.out.println("next num: " + x);
-			rand = (char)(x + '0');
-			drop(num, rand); 
-			pop();
-			printBoard();
-		}
-		*/
+		do {
+			System.out.println("Next drop: " + rand);
+			//board.printBoard();
+			num = scanner.nextInt();
+
+			if ( num == 9 )
+				break;
+
+			board.drop(num, rand); 
+			board.pop();
+			board.printBoard();
+
+			rand = rn.nextInt(7) + 1;
+
+
+		} while ( true );
+
 	}
 
 }
@@ -56,45 +57,63 @@ class Board
 
 	}
 
+	public void drop(int i, int v) {
+		board[i].add(v);
+	}
+
+
+
 	public void pop() {
+		// Start from the assumption nothing pops 
 		boolean popped = false;
 
-		// Create an array of list sizes 
+
 		int sizes[] = new int[size];
 		for ( int i = 0; i < size; i++ )
 			sizes[i] = board[i].size();
 
 		int scores[][] = new int[size][size];
 		int score;
-		for ( int i = 0; i < size; i++ ) {
+		for ( int i = size - 1; i >= 0; i-- ) {
 			for ( int j = 0; j < size; j++ ) {
-				score = board[i].size() - i;
+				score = board[j].size() - i;
 				if ( score < 0 )
 					score = 0;
-				scores[j][i] = (score);
+				scores[j][i] = score;
 			}
 		}
 
 		int count = 0;
 		for ( int y = 0; y < size; y++ ) {
 			for ( int x = 0; x < size; x++ ) {
+				// scores[x][y] is a number and 
+				// increments the count of the sub-array
 				if ( scores[x][y] > 0 )
 					count++;
+				// Reached an empty spot, work backwards 
+				// by count, setting scores[x][y] to 
+				// that count 
 				else {
 					score = count;
 					while ( count > 0 ) {
 						scores[x-count][y] = score;
 						count--;
 					}
+					count = 0;
 				}
+
+				// At the end of the row, work backwats 
+				// by count settings scores as it goes
 				if ( count != 0 && x == size - 1 ) {
 					score = count;
 					while ( count > 0 ) {
 						scores[x-count+1][y] = score;
 						count--;
 					}
+					count = 0;
 				}
 			}
+			count = 0;
 		}
 
 		int curr; 
@@ -103,6 +122,8 @@ class Board
 				curr = board[i].getValueAt(j+1);
 				if ( curr == scores[i][j] ) {
 					popped = true;
+					// Mark the value for popping later 
+					// (avoids dynamic sizing)
 					board[i].setValueAt(j+1, -1);
 				}
 			}
@@ -110,26 +131,50 @@ class Board
 
 		int prevSize; 
 		for ( int i = 0; i < size; i++) {
-			prevSize = board[i].size();
-			board[i].removeValue(board[i].size());
 			// Popping a value changes the size of the board 
+			prevSize = board[i].size();
+
+			// Vertical removals
+			board[i].removeValue(board[i].size());
 			if ( prevSize != board[i].size() )
 				popped = true;
+
+			// Horizontal removals 
 			board[i].removeValue(-1);
 		}
 
+		// Board needs to be checked again for combos 
 		if ( popped == true ) {
 			// Decomment for testing 
 			//printBoard();
 			pop();
 		}
 
+		// Nothing changed, return to main
 		else 
 			return;
 
 
 	}
 
+
+	public void printBoard() {
+		int curr;
+		for ( int j = size; j > 0; j-- ) {
+			for ( int i = 0; i < size; i++ ) {
+				curr = board[i].getValueAt(j);
+				if ( curr == -1 )
+					System.out.print(" *");
+				else 
+					System.out.print(" " + curr);
+			}
+			System.out.println();
+		}
+		System.out.println(" -------------");
+	}
+
+	// Next two methods are for testing purposes
+	// Populate Randomly generates a board state 
 	public void populateRandomly() {
 		Random rn = new Random();
 		int x;
@@ -145,23 +190,10 @@ class Board
 		}
 	}
 
+
 	public void printLists() {
 		for ( int i = 0; i < size; i++ ) 
 			System.out.println(board[i].toString());
 	}
 
-	public void printBoard() {
-		int curr;
-		for ( int j = size; j > 0; j-- ) {
-			for ( int i = 0; i < size; i++ ) {
-				curr = board[i].getValueAt(j);
-				if ( curr == -1 )
-					System.out.print(" *");
-				else 
-					System.out.print(" " + curr);
-			}
-			System.out.println();
-		}
-		System.out.println("--------------");
-	}
 }
