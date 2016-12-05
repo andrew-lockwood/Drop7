@@ -23,16 +23,20 @@ public class Drop7
 		int num;
 
 		do {
-			System.out.println("Next drop: " + rand);
+			System.out.println("---------------");
+			System.out.println(" Score: " + board.getScore());
+			System.out.println(" Number: " + rand);
 			//board.printBoard();
+			board.printBoard();
+
+			System.out.print("Enter a # between 1 and 6: ");
 			num = scanner.nextInt();
 
 			if ( num == 9 )
 				break;
 
 			board.drop(num, rand); 
-			board.pop();
-			board.printBoard();
+			board.pop(1);
 
 			rand = rn.nextInt(7) + 1;
 
@@ -47,6 +51,7 @@ class Board
 {
 	public LinkedList board[];
 	public int size;
+	private int numPopped;
 
 	public Board (int s) {
 		size = s;
@@ -54,7 +59,9 @@ class Board
 
 		for ( int i = 0; i < size; i++ ) 
 			board[i] = new LinkedList();
-
+		start();
+		pop(1);
+		numPopped = 0;
 	}
 
 	public void drop(int i, int v) {
@@ -62,8 +69,7 @@ class Board
 	}
 
 
-
-	public void pop() {
+	public void pop(int depth) {
 		// Start from the assumption nothing pops 
 		boolean popped = false;
 
@@ -121,7 +127,6 @@ class Board
 			for ( int i = 0; i < size; i++ ) {
 				curr = board[i].getValueAt(j+1);
 				if ( curr == scores[i][j] ) {
-					popped = true;
 					// Mark the value for popping later 
 					// (avoids dynamic sizing)
 					board[i].setValueAt(j+1, -1);
@@ -130,24 +135,27 @@ class Board
 		}
 
 		int prevSize; 
+		int totalPopped = 0;
 		for ( int i = 0; i < size; i++) {
-			// Popping a value changes the size of the board 
+			// Remember the initial column size 
 			prevSize = board[i].size();
 
-			// Vertical removals
+			// Pop vertical values
 			board[i].removeValue(board[i].size());
-			if ( prevSize != board[i].size() )
-				popped = true;
 
-			// Horizontal removals 
+			// Pop horizontal values 
 			board[i].removeValue(-1);
+
+			totalPopped += (prevSize - board[i].size());
+
 		}
 
 		// Board needs to be checked again for combos 
-		if ( popped == true ) {
+		if ( totalPopped > 0 ) {
 			// Decomment for testing 
 			//printBoard();
-			pop();
+			numPopped += totalPopped;
+			pop(depth++);
 		}
 
 		// Nothing changed, return to main
@@ -157,6 +165,9 @@ class Board
 
 	}
 
+	public int getScore() {
+		return numPopped;
+	}
 
 	public void printBoard() {
 		int curr;
@@ -170,8 +181,27 @@ class Board
 			}
 			System.out.println();
 		}
-		System.out.println(" -------------");
+		//System.out.println(" -------------");
+		System.out.println(" 0|1|2|3|4|5|6");
+		System.out.println("---------------");
 	}
+
+	public void start() {
+		Random rn = new Random();
+		int x;
+		int rand; 
+
+		for ( int i = 0; i < size; i++ ) {
+			x = rn.nextInt(3) + 1;
+			//System.out.println("x = " + x);
+			for ( int j = 0; j < x; j++ ) {
+				rand = rn.nextInt(size) + 1;
+				board[i].add(rand);
+			}
+		}
+
+	}
+
 
 	// Next two methods are for testing purposes
 	// Populate Randomly generates a board state 
