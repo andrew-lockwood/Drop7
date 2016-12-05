@@ -70,9 +70,6 @@ class Board
 
 
 	public void pop(int depth) {
-		// Start from the assumption nothing pops 
-		boolean popped = false;
-
 
 		int sizes[] = new int[size];
 		for ( int i = 0; i < size; i++ )
@@ -147,7 +144,6 @@ class Board
 			board[i].removeValue(-1);
 
 			totalPopped += (prevSize - board[i].size());
-
 		}
 
 		// Board needs to be checked again for combos 
